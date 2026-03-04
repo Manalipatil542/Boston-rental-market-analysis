@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boston Rental Market Analysis — Manali Patil</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #0f1623;
+  --ink2: #374151;
+  --muted: #6b7280;
+  --light: #f9fafb;
+  --border: #e5e7eb;
+  --border2: #d1d5db;
+  --gold: #d97706;
+  --gold-bg: #fef3c7;
+  --blue: #1d4ed8;
+  --blue-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --orange: #ea580c;
+  --accent: #2563eb;
+  --white: #ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:#fff;color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.7;}
+
+/* ── HEADER ── */
+.site-header{background:var(--ink);color:#fff;padding:0;}
+.header-top{max-width:860px;margin:0 auto;padding:48px 40px 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+.header-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:20px;}
+.header-title{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,6vw,4.2rem);font-weight:900;line-height:1.0;margin-bottom:16px;color:#fff;}
+.header-title em{color:#fbbf24;font-style:italic;}
+.header-byline{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:40px;}
+.header-byline a{color:#fbbf24;text-decoration:none;}
+.header-stats{display:flex;gap:0;border:1px solid rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;margin-bottom:48px;width:fit-content;}
+.hs{padding:20px 28px;border-right:1px solid rgba(255,255,255,0.1);text-align:left;}
+.hs:last-child{border-right:none;}
+.hs-num{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;line-height:1;margin-bottom:4px;}
+.hs-num span{color:#fbbf24;}
+.hs-lbl{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;}
+.header-pills{display:flex;gap:8px;flex-wrap:wrap;padding:0 40px 48px;max-width:860px;margin:0 auto;}
+.pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:6px 14px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;}
+
+/* ── NAV ── */
+.toc-bar{background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;}
+.toc-inner{max-width:860px;margin:0 auto;padding:0 40px;display:flex;gap:0;overflow-x:auto;}
+.toc-a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;letter-spacing:0.5px;padding:14px 16px;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;}
+.toc-a:hover{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ── MAIN LAYOUT ── */
+.article{max-width:860px;margin:0 auto;padding:0 40px;}
+
+/* ── SECTION ── */
+.doc-section{padding:64px 0;border-bottom:1px solid var(--border);}
+.doc-section:last-child{border-bottom:none;}
+.section-num{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--ink);margin-bottom:20px;line-height:1.2;}
+.section-title em{color:var(--gold);font-style:italic;}
+
+/* ── PROSE ── */
+.prose{font-family:'Source Serif 4',serif;font-size:1.05rem;color:var(--ink2);line-height:1.85;margin-bottom:24px;}
+.prose strong{color:var(--ink);font-weight:600;}
+.prose em{font-style:italic;}
+
+/* ── PULLQUOTE ── */
+.pullquote{border-left:4px solid var(--accent);padding:16px 24px;background:var(--blue-bg);border-radius:0 10px 10px 0;margin:28px 0;font-family:'Source Serif 4',serif;font-size:1.05rem;color:var(--ink);font-style:italic;line-height:1.7;}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:28px 0;}
+.kpi{background:var(--light);border:1px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center;transition:box-shadow 0.2s;}
+.kpi:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+.kpi-v{font-family:'Playfair Display',serif;font-size:1.8rem;line-height:1;margin-bottom:6px;}
+.kv-blue{color:var(--blue);} .kv-gold{color:var(--gold);} .kv-green{color:var(--green);} .kv-red{color:var(--red);}
+.kpi-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.kpi-n{font-size:10px;color:#9ca3af;margin-top:3px;}
+
+/* ── FIGURES ── */
+.figure{margin:36px 0;}
+.figure-inner{background:#fff;border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.figure-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+.figure-title{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:20px;}
+.figure-caption{font-size:12px;color:var(--muted);font-style:italic;text-align:center;padding-top:14px;border-top:1px solid var(--border);margin-top:14px;line-height:1.6;}
+.fig-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:640px){.fig-grid{grid-template-columns:1fr;}}
+
+/* ── CALLOUT BOXES ── */
+.callout{border-radius:10px;padding:18px 20px;margin:12px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px;}
+.callout-body{}
+.callout-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.callout-text{font-size:13px;line-height:1.6;color:var(--ink2);}
+.callout.blue{background:var(--blue-bg);border:1px solid #bfdbfe;} .callout.blue .callout-title{color:var(--blue);}
+.callout.green{background:var(--green-bg);border:1px solid #a7f3d0;} .callout.green .callout-title{color:var(--green);}
+.callout.red{background:var(--red-bg);border:1px solid #fecaca;} .callout.red .callout-title{color:var(--red);}
+.callout.gold{background:var(--gold-bg);border:1px solid #fde68a;} .callout.gold .callout-title{color:var(--gold);}
+
+/* ── CORRELATION ── */
+.corr-list{display:flex;flex-direction:column;gap:12px;margin:20px 0;}
+.corr-row{display:flex;align-items:center;gap:14px;}
+.corr-name{width:180px;flex-shrink:0;font-size:13px;color:var(--ink);font-weight:500;}
+.corr-track{flex:1;height:9px;background:var(--border);border-radius:5px;overflow:hidden;}
+.corr-fill{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
+.corr-num{width:52px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:20px 0;}
+.data-table th{background:var(--ink);color:#fff;padding:11px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.data-table th:first-child{border-radius:0;} 
+.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink2);}
+.data-table tr:nth-child(even) td{background:var(--light);}
+.data-table tr:hover td{background:#eff6ff;}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;}
+.bp{background:#fee2e2;color:#991b1b;} .bm{background:#dbeafe;color:#1e40af;} .bv{background:#d1fae5;color:#065f46;}
+
+/* ── MODEL CARDS ── */
+.model-duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0;}
+.mc{border-radius:14px;padding:32px;text-align:center;}
+.mc.gold{background:var(--gold-bg);border:2px solid #fde68a;}
+.mc.blue{background:var(--blue-bg);border:2px solid #bfdbfe;}
+.mc-num{font-family:'Playfair Display',serif;font-size:3.5rem;font-weight:900;line-height:1;}
+.mc.gold .mc-num{color:var(--gold);} .mc.blue .mc-num{color:var(--blue);}
+.mc-lbl{font-size:14px;font-weight:600;color:var(--ink);margin:8px 0 6px;}
+.mc-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── DEAL EXAMPLES ── */
+.deal-split{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:28px 0;}
+@media(max-width:640px){.deal-split{grid-template-columns:1fr;}}
+.dcol-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding-bottom:10px;border-bottom:2px solid;margin-bottom:14px;}
+.dcol-title.g{color:var(--green);border-color:var(--green);}
+.dcol-title.r{color:var(--red);border-color:var(--red);}
+.deal-card{border-radius:12px;padding:18px;margin-bottom:12px;border:1px solid;}
+.deal-card.g{background:var(--green-bg);border-color:#a7f3d0;}
+.deal-card.r{background:var(--red-bg);border-color:#fecaca;}
+.dc-hood{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.deal-card.g .dc-hood{color:var(--green);} .deal-card.r .dc-hood{color:var(--red);}
+.dc-prices{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+.dc-actual{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--ink);}
+.dc-pred{font-size:12px;color:var(--muted);}
+.dc-pct{font-size:13px;font-weight:700;margin-bottom:4px;}
+.deal-card.g .dc-pct{color:var(--green);} .deal-card.r .dc-pct{color:var(--red);}
+.dc-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ── FINDINGS GRID ── */
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0;}
+@media(max-width:700px){.findings{grid-template-columns:1fr 1fr;}}
+.fc{background:var(--light);border:1px solid var(--border);border-radius:12px;padding:22px;transition:box-shadow 0.2s;}
+.fc:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+.fc-icon{font-size:1.5rem;margin-bottom:10px;}
+.fc-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.fc-text{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── CHECKLIST ── */
+.checklist{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:14px;padding:32px;margin:28px 0;}
+.cl-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--blue);margin-bottom:18px;}
+.cl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:600px){.cl-grid{grid-template-columns:1fr;}}
+.ci{display:flex;gap:8px;font-size:13px;color:var(--ink2);line-height:1.5;}
+.ci-check{color:var(--green);flex-shrink:0;font-weight:700;}
+
+/* ── FOOTER ── */
+.footer{background:var(--ink);color:rgba(255,255,255,0.5);text-align:center;padding:48px 40px;font-size:13px;}
+.footer strong{color:#fff;display:block;font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:10px;}
+.footer a{color:#fbbf24;text-decoration:none;}
+
+/* ── REVEAL ── */
+.rev{opacity:0;transform:translateY(24px);transition:opacity 0.6s,transform 0.6s;}
+.rev.on{opacity:1;transform:translateY(0);}
+
+@media(max-width:640px){
+  .article{padding:0 20px;}
+  .header-top,.header-pills{padding-left:20px;padding-right:20px;}
+  .toc-inner{padding:0 20px;}
+  .header-stats{flex-direction:column;width:100%;}
+  .hs{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}
+  .model-duo{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-top">
+    <div>
+      <div class="header-tag">Data Analysis Project · Boston, MA</div>
+      <h1 class="header-title">Boston <em>Rental Market</em><br>Analysis</h1>
+      <p class="header-byline">By <a href="https://bit.ly/ManaliPatil">Manali Patil</a> &nbsp;·&nbsp; <a href="https://github.com/Manalipatil542/boston-rental-market-analysis">GitHub Repository</a> &nbsp;·&nbsp; <a href="http://www.linkedin.com/in/manali-patil03/">LinkedIn</a></p>
+      <div class="header-stats">
+        <div class="hs"><div class="hs-num"><span>500</span></div><div class="hs-lbl">Listings Analyzed</div></div>
+        <div class="hs"><div class="hs-num"><span>16</span></div><div class="hs-lbl">Neighborhoods</div></div>
+        <div class="hs"><div class="hs-num"><span>0.982</span></div><div class="hs-lbl">Model R²</div></div>
+        <div class="hs"><div class="hs-num">$<span>97</span></div><div class="hs-lbl">Avg Error/Mo</div></div>
+        <div class="hs"><div class="hs-num"><span>9.4</span>%</div><div class="hs-lbl">Good Deals</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="header-pills">
+    <span class="pill">Python</span><span class="pill">Pandas</span><span class="pill">Matplotlib</span><span class="pill">Seaborn</span><span class="pill">Machine Learning</span><span class="pill">EDA</span>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc-bar">
+  <div class="toc-inner">
+    <a href="#overview" class="toc-a">Overview</a>
+    <a href="#data" class="toc-a">Data</a>
+    <a href="#neighborhoods" class="toc-a">Neighborhoods</a>
+    <a href="#model" class="toc-a">Model</a>
+    <a href="#deals" class="toc-a">Deal Scoring</a>
+    <a href="#transit" class="toc-a">Transit</a>
+    <a href="#conclusions" class="toc-a">Conclusions</a>
+  </div>
+</nav>
+
+<main class="article">
+
+<!-- ── OVERVIEW ── -->
+<section class="doc-section" id="overview">
+  <div class="rev">
+    <div class="section-num">Project Overview</div>
+    <h2 class="section-title">How can you tell if you're getting <em>ripped off?</em></h2>
+    <p class="prose">Boston consistently ranks among the most expensive cities in the United States to rent an apartment. Many factors determine rental prices, and apartment-seekers could benefit from a simple, objective metric to evaluate whether the asking price of a listing is justified. Put simply — <strong>how can I tell if I'm getting ripped off?</strong></p>
+    <p class="prose">This project analyzes <strong>500 Boston rental listings</strong> across <strong>16 neighborhoods</strong> with 28 attributes per listing — including price, square footage, bedrooms, bathrooms, MBTA proximity, distance to major universities, amenities, and days on market.</p>
+    <p class="prose">The project had three overall goals:</p>
+    <div class="callout blue">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <div class="callout-title">Goal 1 — Understand the Market</div>
+        <div class="callout-text">Analyze the distribution of rental prices across Boston neighborhoods, identify the most and least affordable areas, and uncover which factors drive rent prices.</div>
+      </div>
+    </div>
+    <div class="callout blue">
+      <div class="callout-icon">🤖</div>
+      <div class="callout-body">
+        <div class="callout-title">Goal 2 — Build a Price Prediction Model</div>
+        <div class="callout-text">Develop a machine learning model that predicts expected rent based on property characteristics and location, achieving R²=0.982 and MAE=$97/month.</div>
+      </div>
+    </div>
+    <div class="callout blue">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Goal 3 — Generate Actionable Insights</div>
+        <div class="callout-text">Categorize every listing as Excellent Deal, Good Deal, Fair Price, Overpriced, or Very Overpriced — and identify where renters can find genuine value in Boston's competitive market.</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:32px;">
+      <div class="kpi"><div class="kpi-v kv-gold">$3,711</div><div class="kpi-l">Avg Monthly Rent</div><div class="kpi-n">City-wide average</div></div>
+      <div class="kpi"><div class="kpi-v kv-blue">$1,325</div><div class="kpi-l">Cheapest Listing</div><div class="kpi-n">Roxbury studio</div></div>
+      <div class="kpi"><div class="kpi-v kv-red">$8,093</div><div class="kpi-l">Most Expensive</div><div class="kpi-n">South End</div></div>
+      <div class="kpi"><div class="kpi-v kv-green">9.4%</div><div class="kpi-l">Are Good Deals</div><div class="kpi-n">47 of 500 listings</div></div>
+      <div class="kpi"><div class="kpi-v">28</div><div class="kpi-l">Attributes/Listing</div><div class="kpi-n">Location + amenities</div></div>
+      <div class="kpi"><div class="kpi-v kv-blue">0</div><div class="kpi-l">Missing Values</div><div class="kpi-n">Clean dataset</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DATA OVERVIEW ── -->
+<section class="doc-section" id="data">
+  <div class="rev">
+    <div class="section-num">Section 1 — Data Overview</div>
+    <h2 class="section-title">Dataset Description</h2>
+    <p class="prose">The dataset contains <strong>500 Boston rental listings</strong> with 28 attributes per listing. Variables were organized into four categories: property attributes, location features, amenity features, and derived pricing features.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Property Attributes</h3>
+    <p class="prose">Key property variables include price (monthly rent in USD), number of bedrooms (0–4), bathrooms, square footage, and price per square foot. The dataset also records days on market, which serves as a proxy for listing demand — units with fewer days on market indicate stronger demand.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Location Features</h3>
+    <p class="prose">Each listing includes neighborhood (16 distinct areas), MBTA line assignment (Red, Orange, Green, or Blue), distance to the nearest MBTA station in miles, and distances to four major universities: Harvard, MIT, Boston University, and Northeastern.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Amenity Features</h3>
+    <p class="prose">Amenity data covers heat included (39.0% of listings), hot water included (35.8%), parking included (26.8%), pets allowed (46.2%), laundry type (in-unit, in-building, or none), furnished status, and broker fee. A composite <strong>amenity score</strong> from 0 to 8 was derived from these binary features.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Derived Features</h3>
+    <p class="prose">The most important derived features are the model's <strong>predicted price</strong> and the resulting <strong>price difference percentage</strong> — the percentage by which a listing's actual price exceeds or falls short of the model's expected price. This forms the basis of the deal scoring system.</p>
+
+    <div class="pullquote">"The overall distribution of prices was positively skewed (skewness = 0.721), with the majority of listings concentrated between $2,700 and $4,500 per month. The distribution reflects Boston's housing market: a large middle tier of standard apartments with a long upper tail driven by luxury units in premium neighborhoods."</div>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 1</div>
+        <div class="figure-title">Distribution of Monthly Rent — Price by Bedroom Count</div>
+        <canvas id="bedChart" height="260"></canvas>
+        <p class="figure-caption">Figure 1. Average monthly rent by bedroom count across all 500 listings. Bedroom count is the strongest single predictor of rent (r=0.825). Each additional bedroom adds approximately $1,000–$1,100/month, with studios averaging $2,061 and 4-bedroom units averaging $6,165 — a nearly 3× difference.</p>
+      </div>
+    </div>
+
+    <p class="prose">The data also reveals a strong interaction between property size and price. For listings that included square footage, there was a strong positive correlation (r=0.704) between sqft and price, suggesting that price per square foot varies meaningfully across neighborhoods. Larger units in premium neighborhoods command both higher absolute prices and higher price-per-sqft.</p>
+  </div>
+</section>
+
+<!-- ── NEIGHBORHOODS ── -->
+<section class="doc-section" id="neighborhoods">
+  <div class="rev">
+    <div class="section-num">Section 2 — Neighborhood Analysis</div>
+    <h2 class="section-title">A $2,164 gap separates <em>best from worst value</em></h2>
+    <p class="prose">Average rent varies dramatically by neighborhood. Back Bay ($4,692/month) and Beacon Hill ($4,668/month) represent the premium tier — driven by central location, historic prestige, and proximity to the Financial District. At the other end, Roxbury ($2,528/month) and East Boston ($2,815/month) offer dramatically lower rents while maintaining strong MBTA access.</p>
+    <p class="prose">The analysis groups neighborhoods into three tiers based on average monthly rent:</p>
+
+    <div class="callout red"><div class="callout-icon">🏙️</div><div class="callout-body"><div class="callout-title">Premium Tier (avg &gt; $4,000/month)</div><div class="callout-text">Back Bay, Beacon Hill, Cambridge, South Boston, South End, Brookline — central locations with high demand, limited supply, and luxury housing stock.</div></div></div>
+    <div class="callout blue"><div class="callout-icon">🏘️</div><div class="callout-body"><div class="callout-title">Mid-Tier ($3,000–$4,000/month)</div><div class="callout-text">Somerville, Fenway, Charlestown, Jamaica Plain, Allston, Mission Hill, Brighton — the bulk of the market with diverse housing types and good transit access.</div></div></div>
+    <div class="callout green"><div class="callout-icon">💚</div><div class="callout-body"><div class="callout-title">Value Tier (avg &lt; $3,000/month)</div><div class="callout-text">Dorchester, East Boston, Roxbury — most affordable neighborhoods with growing demand and strong appreciation potential.</div></div></div>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 2</div>
+        <div class="figure-title">Average Monthly Rent by Boston Neighborhood</div>
+        <canvas id="hoodChart" height="380"></canvas>
+        <p class="figure-caption">Figure 2. Average monthly rent across all 16 neighborhoods sorted from most to least expensive. The gold dashed line marks the city-wide average of $3,711/month. Red bars = premium tier (&gt;$4,000), blue = mid-tier ($3,000–$4,000), green = value tier (&lt;$3,000). Plot generated from 500 Boston rental listings.</p>
+      </div>
+    </div>
+
+    <p class="prose">A particularly notable finding is East Boston's position in the dataset. Despite being directly on the Blue Line with convenient access to downtown Boston, East Boston has the <strong>second-lowest average rent</strong> ($2,815/month) and the <strong>highest listing count</strong> (42 listings) of any neighborhood. This suggests that East Boston is significantly undervalued relative to its transit convenience and represents one of the best opportunities for value-conscious renters in the dataset.</p>
+
+    <div class="figure" style="margin-top:24px;">
+      <div class="figure-inner">
+        <div class="figure-label">Neighborhood Data Table</div>
+        <div class="figure-title">Complete Neighborhood Statistics</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Neighborhood</th><th>Avg Rent</th><th>Median</th><th>Range</th><th>Listings</th><th>Avg Sqft</th><th>Tier</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Back Bay</td><td>$4,692</td><td>$4,532</td><td>$2,096–$7,531</td><td>29</td><td>887</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>2</td><td>Beacon Hill</td><td>$4,668</td><td>$4,563</td><td>$2,664–$7,308</td><td>32</td><td>882</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>3</td><td>Cambridge</td><td>$4,638</td><td>$4,290</td><td>$2,189–$8,082</td><td>32</td><td>970</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>4</td><td>South Boston</td><td>$4,407</td><td>$4,568</td><td>$2,494–$7,941</td><td>31</td><td>819</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>5</td><td>South End</td><td>$4,207</td><td>$3,904</td><td>$2,449–$8,093</td><td>30</td><td>780</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>6</td><td>Brookline</td><td>$4,066</td><td>$3,832</td><td>$1,814–$7,397</td><td>21</td><td>824</td><td><span class="badge bp">Premium</span></td></tr>
+              <tr><td>7</td><td>Somerville</td><td>$3,922</td><td>$3,648</td><td>$1,907–$6,661</td><td>32</td><td>911</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>8</td><td>Fenway</td><td>$3,865</td><td>$3,698</td><td>$2,379–$6,819</td><td>39</td><td>810</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>9</td><td>Charlestown</td><td>$3,616</td><td>$3,250</td><td>$1,977–$5,839</td><td>28</td><td>829</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>10</td><td>Jamaica Plain</td><td>$3,540</td><td>$3,319</td><td>$1,965–$5,788</td><td>29</td><td>889</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>11</td><td>Allston</td><td>$3,471</td><td>$3,474</td><td>$1,802–$6,448</td><td>22</td><td>948</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>12</td><td>Mission Hill</td><td>$3,279</td><td>$2,767</td><td>$1,376–$5,666</td><td>36</td><td>863</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>13</td><td>Brighton</td><td>$3,228</td><td>$3,089</td><td>$1,388–$5,473</td><td>32</td><td>880</td><td><span class="badge bm">Mid-Tier</span></td></tr>
+              <tr><td>14</td><td>Dorchester</td><td>$2,968</td><td>$2,953</td><td>$1,591–$5,121</td><td>30</td><td>886</td><td><span class="badge bv">Value</span></td></tr>
+              <tr><td>15</td><td>East Boston</td><td>$2,815</td><td>$2,940</td><td>$1,567–$4,535</td><td>42</td><td>803</td><td><span class="badge bv">Value</span></td></tr>
+              <tr><td>16</td><td>Roxbury</td><td>$2,528</td><td>$2,544</td><td>$1,325–$4,297</td><td>35</td><td>806</td><td><span class="badge bv">Value</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MODEL ── -->
+<section class="doc-section" id="model">
+  <div class="rev">
+    <div class="section-num">Section 3 — Price Prediction Model</div>
+    <h2 class="section-title">A model that explains <em>98.2% of rent variation</em></h2>
+    <p class="prose">The core analytical contribution of this project is a machine learning model that predicts expected rental price based on property characteristics and location. The model enables systematic, objective identification of underpriced and overpriced listings across the entire Boston market.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Feature Analysis</h3>
+    <p class="prose">Prior to modeling, I analyzed the correlation between each numeric feature and rental price to understand which factors drive Boston rents. The results reveal a clear hierarchy of predictors, with property size features dominating and location features playing a surprisingly secondary role.</p>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 3</div>
+        <div class="figure-title">Feature Correlations with Monthly Rent</div>
+        <div class="corr-list" id="corrList"></div>
+        <p class="figure-caption">Figure 3. Pearson correlation coefficients between numeric features and monthly rent. Bedroom count (r=0.825) and square footage (r=0.704) are the dominant predictors. MBTA distance shows only a weak negative correlation (-0.151), challenging the conventional assumption that transit proximity strongly drives Boston rent prices.</p>
+      </div>
+    </div>
+
+    <p class="prose">The dominance of bedroom count (r=0.825) and square footage (r=0.704) confirms that <strong>property size is the primary pricing driver</strong> in Boston. The surprisingly weak correlation for MBTA proximity (-0.151) and near-zero correlations for university distances (all below 0.05) challenge conventional wisdom about Boston rental pricing. Neighborhood brand and apartment size matter far more than transit access when landlords set prices.</p>
+    <p class="prose">The amenity score's low correlation (0.098) is also notable — it suggests that landlords are not efficiently pricing amenities like heat, parking, and in-unit laundry into their rents. This represents a systematic opportunity for renters: listings that include these amenities are effectively offering them for free relative to market expectations.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Model Performance</h3>
+    <p class="prose">The price prediction model was evaluated on the full dataset of 500 listings and achieved exceptional performance metrics:</p>
+
+    <div class="model-duo">
+      <div class="mc gold">
+        <div class="mc-num">0.982</div>
+        <div class="mc-lbl">R-squared Score</div>
+        <div class="mc-desc">The model explains 98.2% of variance in rental prices across 500 Boston listings — an exceptionally strong fit.</div>
+      </div>
+      <div class="mc blue">
+        <div class="mc-num">$97</div>
+        <div class="mc-lbl">Mean Absolute Error / Month</div>
+        <div class="mc-desc">Predictions are within $97 of actual price on average — just 2.6% of mean rent. Reliable enough to flag any 10%+ deviation.</div>
+      </div>
+    </div>
+
+    <p class="prose">An R² of 0.982 indicates an exceptionally strong model fit. The low MAE of $97/month means that for a typical $3,711/month listing, the model's prediction is off by only 2.6% — well within the margin needed to reliably identify genuine deals versus fairly priced units. This provides a solid basis for the deal scoring system described in the next section.</p>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 4</div>
+        <div class="figure-title">Actual vs. Predicted Rent Price — All 500 Listings</div>
+        <canvas id="scatterChart" height="380"></canvas>
+        <p class="figure-caption">Figure 4. Each point represents one of 500 listings. The dashed diagonal line represents perfect prediction (actual = predicted). Points above the line are overpriced (actual &gt; predicted); points below are good deals (actual &lt; predicted). Points are color-coded by deal category: green for Excellent/Good Deals, blue for Fair Price, and red/orange for Overpriced/Very Overpriced listings. The tight clustering around the diagonal confirms the model's R²=0.982.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEALS ── -->
+<section class="doc-section" id="deals">
+  <div class="rev">
+    <div class="section-num">Section 4 — Deal Score Analysis</div>
+    <h2 class="section-title">Only <em>9.4% of listings</em> are genuine good deals</h2>
+    <p class="prose">Each listing was categorized based on the percentage difference between actual price and model-predicted price. This creates a standardized, objective deal score that allows renters to compare listings across neighborhoods and property types on equal footing. The categories were defined as follows:</p>
+
+    <div class="callout green"><div class="callout-icon">✅</div><div class="callout-body"><div class="callout-title">Excellent Deal — 16 listings (3.2%)</div><div class="callout-text">Priced 10% or more below predicted value. These are rare mispriced listings representing significant savings versus comparable units.</div></div></div>
+    <div class="callout green"><div class="callout-icon">👍</div><div class="callout-body"><div class="callout-title">Good Deal — 31 listings (6.2%)</div><div class="callout-text">Priced below predicted value. Worth prioritizing in your apartment search — below market but within normal variance.</div></div></div>
+    <div class="callout blue"><div class="callout-icon">⚖️</div><div class="callout-body"><div class="callout-title">Fair Price — 426 listings (85.2%)</div><div class="callout-text">Priced within the expected range for the property's characteristics and location. The vast majority of the market.</div></div></div>
+    <div class="callout red"><div class="callout-icon">⚠️</div><div class="callout-body"><div class="callout-title">Overpriced / Very Overpriced — 27 listings (5.4%)</div><div class="callout-text">Priced above predicted value, with Very Overpriced listings at 10%+ above expected price. These should be avoided or negotiated down aggressively.</div></div></div>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 5</div>
+        <div class="figure-title">Deal Distribution & Best Neighborhoods for Good Deals</div>
+        <div class="fig-grid">
+          <div>
+            <canvas id="dealPie" height="280"></canvas>
+          </div>
+          <div>
+            <canvas id="dealBar" height="280"></canvas>
+          </div>
+        </div>
+        <p class="figure-caption">Figure 5. Left: Distribution of listing categories showing 85.2% of listings are fairly priced — deals are rare in Boston's competitive market. Right: Top neighborhoods by count of Good and Excellent Deal listings. Roxbury leads with 9 good deals, followed by Mission Hill (6), East Boston and Brighton (5 each).</p>
+      </div>
+    </div>
+
+    <p class="prose">The market is overwhelmingly composed of fairly priced listings (85.2%), reflecting a tight, landlord-favored rental market where competition naturally eliminates significant mispricing. Only 9.4% of listings represent genuine good deals — making systematic deal identification a high-value analytical problem for renters.</p>
+    <p class="prose">Importantly, <strong>Very Overpriced listings appear across all neighborhood tiers</strong> — from premium Back Bay to affordable Roxbury. This confirms that overpricing is driven by individual landlord decisions rather than neighborhood-level market dynamics. Using the model as a benchmark is therefore essential regardless of which neighborhood you are searching in.</p>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:28px 0 12px;">Real Examples: Excellent Deals vs. Very Overpriced</h3>
+    <p class="prose">The following listings illustrate the two extremes of the deal scoring distribution:</p>
+
+    <div class="deal-split">
+      <div>
+        <div class="dcol-title g">✅ Excellent Deals — 10%+ Below Market</div>
+        <div class="deal-card g"><div class="dc-hood">Roxbury</div><div class="dc-prices"><span class="dc-actual">$2,059</span><span class="dc-pred">predicted $2,774</span></div><div class="dc-pct">−25.8% below market value</div><div class="dc-meta">1 bed · 768 sqft · amenity score 5</div></div>
+        <div class="deal-card g"><div class="dc-hood">Beacon Hill</div><div class="dc-prices"><span class="dc-actual">$3,202</span><span class="dc-pred">predicted $3,585</span></div><div class="dc-pct">−10.7% below market value</div><div class="dc-meta">1 bed · 693 sqft · amenity score 3</div></div>
+        <div class="deal-card g"><div class="dc-hood">Brighton</div><div class="dc-prices"><span class="dc-actual">$1,557</span><span class="dc-pred">predicted $1,758</span></div><div class="dc-pct">−11.4% below market value</div><div class="dc-meta">Studio · 407 sqft · amenity score 2</div></div>
+        <div class="deal-card g"><div class="dc-hood">Dorchester</div><div class="dc-prices"><span class="dc-actual">$2,156</span><span class="dc-pred">predicted $2,397</span></div><div class="dc-pct">−10.1% below market value</div><div class="dc-meta">1 bed · 571 sqft · amenity score 3</div></div>
+      </div>
+      <div>
+        <div class="dcol-title r">⚠️ Very Overpriced — 10%+ Above Market</div>
+        <div class="deal-card r"><div class="dc-hood">Back Bay</div><div class="dc-prices"><span class="dc-actual">$5,150</span><span class="dc-pred">predicted $4,609</span></div><div class="dc-pct">+11.7% above market value</div><div class="dc-meta">2 bed · 865 sqft · amenity score 2</div></div>
+        <div class="deal-card r"><div class="dc-hood">Brookline</div><div class="dc-prices"><span class="dc-actual">$5,754</span><span class="dc-pred">predicted $5,070</span></div><div class="dc-pct">+13.5% above market value</div><div class="dc-meta">3 bed · 1,100 sqft · amenity score 7</div></div>
+        <div class="deal-card r"><div class="dc-hood">Roxbury</div><div class="dc-prices"><span class="dc-actual">$1,767</span><span class="dc-pred">predicted $1,531</span></div><div class="dc-pct">+15.4% above market value</div><div class="dc-meta">Studio · 560 sqft · amenity score 3</div></div>
+        <div class="deal-card r"><div class="dc-hood">South Boston</div><div class="dc-prices"><span class="dc-actual">$7,941</span><span class="dc-pred">predicted $6,981</span></div><div class="dc-pct">+13.7% above market value</div><div class="dc-meta">4 bed · luxury unit</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRANSIT ── -->
+<section class="doc-section" id="transit">
+  <div class="rev">
+    <div class="section-num">Section 5 — Transit & Location Analysis</div>
+    <h2 class="section-title">Transit proximity: a <em>surprisingly weak</em> price driver</h2>
+    <p class="prose">Boston's MBTA system is often cited as a major driver of rental prices. The data tells a more nuanced story. While transit proximity does show a slight negative correlation with price (-0.151), this effect is weak and dominated by neighborhood and property size effects. Renters should not assume that living further from a station will yield significant savings.</p>
+
+    <div class="figure">
+      <div class="figure-inner">
+        <div class="figure-label">Figure 6</div>
+        <div class="figure-title">Average Rent by MBTA Line</div>
+        <canvas id="mbtaChart" height="240"></canvas>
+        <p class="figure-caption">Figure 6. Average monthly rent for listings served by each MBTA line. Red Line neighborhoods command the highest average rents ($4,134/month), but all four lines have nearly identical average distances to stations (0.28–0.33 miles). The rent difference reflects neighborhood prestige — Cambridge, South Boston and Beacon Hill for the Red Line vs. East Boston for the Blue Line — not transit access per se.</p>
+      </div>
+    </div>
+
+    <p class="prose">The data also reveals that distances to major universities (Harvard, MIT, BU, Northeastern) have essentially negligible correlations with rent (all below ±0.05). This is counterintuitive — one would expect university proximity to command a premium. The likely explanation is that university areas like Cambridge, Fenway and Mission Hill are already captured as high-demand neighborhoods, meaning the university proximity effect is absorbed into the neighborhood variable rather than adding an independent premium.</p>
+
+    <div class="callout gold">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Key Insight: East Boston is the Market's Hidden Gem</div>
+        <div class="callout-text">East Boston sits directly on the Blue Line with a 10–15 minute commute to downtown Boston. Yet it has the 2nd lowest average rent ($2,815/month) in the dataset — 24% below the city average — and the highest listing count (42 listings) of any neighborhood. For commuters willing to cross the harbor, East Boston offers exceptional value that the market has not yet fully priced in.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONCLUSIONS ── -->
+<section class="doc-section" id="conclusions">
+  <div class="rev">
+    <div class="section-num">Section 6 — Conclusions</div>
+    <h2 class="section-title">Key findings & <em>recommendations</em></h2>
+    <p class="prose">This project combined exploratory data analysis, feature correlation analysis, and machine learning to extract actionable insights from 500 Boston rental listings. The results provide a clear, data-driven framework for evaluating rental listings in one of America's most expensive cities.</p>
+
+    <div class="findings">
+      <div class="fc"><div class="fc-icon">🛏️</div><div class="fc-title">Bedrooms Drive Price (r=0.825)</div><div class="fc-text">The strongest predictor of rent. Each bedroom adds ~$1,000/month. Studios avg $2,061; 4-beds avg $6,165.</div></div>
+      <div class="fc"><div class="fc-icon">🔍</div><div class="fc-title">Only 9.4% Are Good Deals</div><div class="fc-text">Boston's tight market eliminates mispricing fast. 85.2% of listings are fairly priced — act quickly on deals.</div></div>
+      <div class="fc"><div class="fc-icon">📍</div><div class="fc-title">East Boston: Best Value</div><div class="fc-text">Direct Blue Line access + $2,815 avg rent (24% below city avg) + highest listing count = best value opportunity.</div></div>
+      <div class="fc"><div class="fc-icon">⭐</div><div class="fc-title">Amenities Underpriced</div><div class="fc-text">Amenity score r=0.098 with price. Heat, parking and laundry are not efficiently priced in — look for listings that include them.</div></div>
+      <div class="fc"><div class="fc-icon">🚇</div><div class="fc-title">Don't Pay MBTA Premium</div><div class="fc-text">Transit correlation = −0.151. Neighbourhood brand dominates. Don't overpay just for station proximity.</div></div>
+      <div class="fc"><div class="fc-icon">⚠️</div><div class="fc-title">Overpricing is Individual</div><div class="fc-text">Very Overpriced listings span all tiers — Back Bay to Roxbury. Always compare against predicted price before committing.</div></div>
+    </div>
+
+    <div class="checklist">
+      <div class="cl-title">Renter's Action Checklist</div>
+      <div class="cl-grid">
+        <div class="ci"><span class="ci-check">✓</span><span>Target Roxbury, East Boston or Mission Hill for best deal density</span></div>
+        <div class="ci"><span class="ci-check">✓</span><span>Flag any listing priced 10%+ above predicted value as overpriced</span></div>
+        <div class="ci"><span class="ci-check">✓</span><span>Don't pay a transit premium — MBTA correlation is only −0.151</span></div>
+        <div class="ci"><span class="ci-check">✓</span><span>Prioritize listings with heat & parking included — underpriced amenities</span></div>
+        <div class="ci"><span class="ci-check">✓</span><span>Act fast on Good/Excellent Deal listings — only 47 of 500 qualify</span></div>
+        <div class="ci"><span class="ci-check">✓</span><span>Studio or 1-bed for best value — each bedroom adds ~$1,000/month</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--ink);margin:36px 0 12px;">Model Limitations & Future Work</h3>
+    <p class="prose">The dataset covers 500 listings at a single point in time, meaning seasonal variation and longer-term price trends are not captured. The model also does not account for qualitative factors such as unit condition, building age, natural light, or views — which can significantly affect perceived value and willingness to pay.</p>
+    <p class="prose">Future work could improve prediction accuracy by incorporating neighborhood-level time series data, testing nonlinear models, and building a live web application — similar to the RentNYC approach — that allows non-technical users to compare expected and actual prices for individual listings with a single click.</p>
+
+    <div class="callout blue" style="margin-top:32px;">
+      <div class="callout-icon">📁</div>
+      <div class="callout-body">
+        <div class="callout-title">Full Code & Dataset</div>
+        <div class="callout-text">The complete analysis notebook, dataset, and all visualizations are available at: <a href="https://github.com/Manalipatil542/boston-rental-market-analysis" style="color:var(--blue);">github.com/Manalipatil542/boston-rental-market-analysis</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <strong>Manali Patil — Data Analyst</strong>
+  <p><a href="https://bit.ly/ManaliPatil">Portfolio</a> &nbsp;·&nbsp; <a href="https://github.com/Manalipatil542/boston-rental-market-analysis">GitHub</a> &nbsp;·&nbsp; <a href="http://www.linkedin.com/in/manali-patil03/">LinkedIn</a></p>
+  <p style="margin-top:10px;font-size:11px;font-family:'JetBrains Mono',monospace;">Python · Pandas · Matplotlib · Seaborn · Machine Learning</p>
+</footer>
+
+<script>
+Chart.defaults.color='#6b7280';
+Chart.defaults.borderColor='#e5e7eb';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+
+// Bedroom chart
+new Chart(document.getElementById('bedChart'),{type:'bar',data:{labels:['Studio (0 bed)','1 Bedroom','2 Bedrooms','3 Bedrooms','4 Bedrooms'],datasets:[{data:[2061,2819,3903,5079,6165],backgroundColor:['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#1d4ed8'],borderRadius:7,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.y.toLocaleString()}/mo avg`}}},scales:{y:{ticks:{callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}}}});
+
+// Hood chart
+const hv=[4692,4668,4638,4407,4207,4066,3922,3865,3616,3540,3471,3279,3228,2968,2815,2528];
+new Chart(document.getElementById('hoodChart'),{type:'bar',data:{labels:['Back Bay','Beacon Hill','Cambridge','S. Boston','South End','Brookline','Somerville','Fenway','Charlestown','Jamaica Pl.','Allston','Mission Hill','Brighton','Dorchester','E. Boston','Roxbury'],datasets:[{data:hv,backgroundColor:hv.map(v=>v>4000?'#fca5a5':v>3000?'#93c5fd':'#6ee7b7'),borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.x.toLocaleString()}/mo`}},annotation:{annotations:{avg:{type:'line',xMin:3711,xMax:3711,borderColor:'#d97706',borderWidth:2,borderDash:[5,3],label:{content:'City avg $3,711',display:true,position:'start',color:'#d97706',font:{size:10}}}}}},scales:{x:{min:2000,ticks:{callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#f3f4f6'}},y:{ticks:{font:{size:11}},grid:{display:false}}}}});
+
+// Corr bars
+const corrData=[{n:'Bedrooms',v:0.825,c:'#1d4ed8'},{n:'Square Footage',v:0.704,c:'#1d4ed8'},{n:'Bathrooms',v:0.661,c:'#2563eb'},{n:'Price per Sqft',v:0.324,c:'#60a5fa'},{n:'Amenity Score',v:0.098,c:'#9ca3af'},{n:'MBTA Distance',v:-0.151,c:'#dc2626'}];
+const cl=document.getElementById('corrList');
+corrData.forEach(i=>{cl.innerHTML+=`<div class="corr-row"><div class="corr-name">${i.n}</div><div class="corr-track"><div class="corr-fill" style="width:0%;background:${i.c};" data-w="${Math.abs(i.v)*100}%"></div></div><div class="corr-num">${i.v>0?'+':''}${i.v}</div></div>`;});
+
+// Scatter
+const sr=[[3336,3559,"Good Deal"],[2059,2774,"Excellent Deal"],[4440,3857,"Very Overpriced"],[2140,2283,"Good Deal"],[5098,4593,"Very Overpriced"],[4127,4352,"Good Deal"],[1567,1967,"Excellent Deal"],[3955,3775,"Fair Price"],[3010,3112,"Fair Price"],[4333,3367,"Very Overpriced"],[1767,1531,"Very Overpriced"],[2507,2530,"Fair Price"],[4717,4359,"Overpriced"],[3438,3303,"Fair Price"],[3426,4314,"Excellent Deal"],[4328,3883,"Very Overpriced"],[4023,3805,"Overpriced"],[3414,3416,"Fair Price"],[2909,3190,"Good Deal"],[2962,2965,"Fair Price"],[4507,4337,"Fair Price"],[6050,6039,"Fair Price"],[2550,3181,"Excellent Deal"],[2899,3052,"Good Deal"],[1977,2238,"Excellent Deal"],[1666,1913,"Excellent Deal"],[1557,1758,"Excellent Deal"],[5150,4609,"Very Overpriced"],[3846,3252,"Very Overpriced"],[4983,5428,"Good Deal"],[4839,4435,"Overpriced"],[5829,5921,"Fair Price"],[5626,4571,"Very Overpriced"],[2677,2442,"Overpriced"],[3202,3585,"Excellent Deal"],[6769,7252,"Good Deal"],[6071,6111,"Fair Price"],[4101,4424,"Good Deal"],[5754,5070,"Very Overpriced"],[2156,2397,"Excellent Deal"],[2532,2789,"Good Deal"],[3868,3680,"Overpriced"],[3331,2997,"Very Overpriced"],[6230,6880,"Good Deal"],[3393,3879,"Excellent Deal"],[5321,4618,"Very Overpriced"],[3777,3399,"Very Overpriced"],[2266,2800,"Excellent Deal"],[3999,4229,"Good Deal"],[1325,1461,"Good Deal"],[5947,6368,"Good Deal"],[3521,3788,"Good Deal"],[2806,3315,"Excellent Deal"],[1828,1964,"Good Deal"],[2101,2320,"Good Deal"],[3191,3397,"Good Deal"],[2554,2772,"Good Deal"],[1983,2418,"Excellent Deal"],[3214,2882,"Very Overpriced"],[5216,4687,"Very Overpriced"],[7941,6981,"Very Overpriced"],[2261,2538,"Excellent Deal"],[4393,4021,"Overpriced"],[2941,2638,"Very Overpriced"],[3554,3229,"Very Overpriced"],[2442,2718,"Excellent Deal"],[4532,4576,"Fair Price"],[3715,3846,"Fair Price"],[3064,3099,"Fair Price"],[3289,3202,"Fair Price"],[4564,4509,"Fair Price"],[4629,4534,"Fair Price"],[4246,4169,"Fair Price"],[3036,2932,"Fair Price"],[2653,2567,"Fair Price"],[3559,3607,"Fair Price"],[3309,3368,"Fair Price"],[4423,4360,"Fair Price"],[2508,2565,"Fair Price"],[4416,4549,"Fair Price"],[4283,4290,"Fair Price"],[2745,2746,"Fair Price"],[3132,3238,"Fair Price"],[4191,4174,"Fair Price"],[2720,2662,"Fair Price"],[3597,3644,"Fair Price"],[2780,2748,"Fair Price"],[2655,2642,"Fair Price"],[2847,2931,"Fair Price"],[3069,2976,"Fair Price"],[3104,3202,"Fair Price"],[2160,2177,"Fair Price"],[2645,2629,"Fair Price"],[3767,3826,"Fair Price"]];
+const cc={'Excellent Deal':'#059669','Good Deal':'#34d399','Fair Price':'#60a5fa','Overpriced':'#f97316','Very Overpriced':'#dc2626'};
+new Chart(document.getElementById('scatterChart'),{type:'scatter',data:{datasets:[...Object.entries(cc).map(([cat,color])=>({label:cat,data:sr.filter(r=>r[2]===cat).map(r=>({x:r[1],y:r[0]})),backgroundColor:color+'cc',pointRadius:5,pointHoverRadius:7})),{label:'Perfect Prediction',data:[{x:1200,y:1200},{x:8200,y:8200}],type:'line',borderColor:'#374151',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:12}},tooltip:{callbacks:{label:c=>c.dataset.label!=='Perfect Prediction'?`Actual $${c.raw.y.toLocaleString()} / Predicted $${c.raw.x.toLocaleString()}`:''}}},scales:{x:{title:{display:true,text:'Predicted Price ($)',color:'#6b7280'},min:1200,max:8200,ticks:{callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#f3f4f6'}},y:{title:{display:true,text:'Actual Price ($)',color:'#6b7280'},min:1200,max:8200,ticks:{callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#f3f4f6'}}}}});
+
+// Deal pie
+new Chart(document.getElementById('dealPie'),{type:'doughnut',data:{labels:['Fair Price','Good Deal','Very Overpriced','Excellent Deal','Overpriced'],datasets:[{data:[426,31,17,16,10],backgroundColor:['#60a5fa','#34d399','#dc2626','#059669','#f97316'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:10}}}}});
+
+// Deal bar
+new Chart(document.getElementById('dealBar'),{type:'bar',data:{labels:['Roxbury','Mission Hill','E. Boston','Brighton','Dorchester','Beacon Hill','Somerville','Cambridge'],datasets:[{data:[9,6,5,5,4,4,4,3],backgroundColor:'#34d399',borderRadius:5,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Good/Excellent Deals',color:'#6b7280',font:{size:10}},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+// MBTA
+new Chart(document.getElementById('mbtaChart'),{type:'bar',data:{labels:['Red Line','Orange Line','Green Line','Blue Line'],datasets:[{data:[4134,3597,3647,2815],backgroundColor:['#fca5a5','#fed7aa','#6ee7b7','#93c5fd'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.parsed.y.toLocaleString()}/mo avg`}}},scales:{y:{min:2000,ticks:{callback:v=>`$${(v/1000).toFixed(1)}k`},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}}}});
+
+// Reveal on scroll
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');e.target.querySelectorAll('.corr-fill').forEach(b=>{setTimeout(()=>b.style.width=b.dataset.w,300);});}});},{threshold:0.08});
+document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
